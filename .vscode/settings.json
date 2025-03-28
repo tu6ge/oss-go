@@ -1,0 +1,14 @@
+{
+  "[go]":{
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "golang.go",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "never"
+    }
+  },
+  "gopls": {
+    "formatting.gofumpt": true
+  }
+}
