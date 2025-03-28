@@ -17,13 +17,19 @@ import (
 type Client struct {
 	access_key_id    string
 	access_secret_id types.Secret
+	bucket           Bucket
 }
 
-func New(key, secret string) Client {
+func New(key, secret, bucket, endpoint string) (Client, error) {
+	bucket_name, err := NewBucket(bucket, endpoint)
+	if err != nil {
+		return Client{}, err
+	}
 	return Client{
 		key,
 		types.NewSecret(secret),
-	}
+		bucket_name,
+	}, nil
 }
 
 func NewWithEnv() (Client, error) {
@@ -40,7 +46,12 @@ func NewWithEnv() (Client, error) {
 		return Client{}, &EnvEmtpyError{}
 	}
 
-	return Client{key_id, types.NewSecret(secret_id)}, nil
+	bucket, err := BucketFromEnv()
+	if err != nil {
+		return Client{}, err
+	}
+
+	return Client{key_id, types.NewSecret(secret_id), bucket}, nil
 }
 
 func (c Client) Authorization(method string, resource types.CanonicalizedResource) map[string]string {

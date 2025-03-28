@@ -5,8 +5,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/tu6ge/oss-go/types"
 )
 
@@ -21,7 +23,25 @@ func NewBucket(name, endpoint string) (Bucket, error) {
 		return Bucket{}, err
 	}
 
+	if len(name) == 0 {
+		return Bucket{}, &InvalidBucketName{}
+	}
+
 	return Bucket{name, end}, nil
+}
+
+func BucketFromEnv() (Bucket, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return Bucket{}, err
+	}
+	name := os.Getenv("ALIYUN_BUCKET")
+	end, err := types.EndPointFromEnv()
+	if err != nil {
+		return Bucket{}, err
+	}
+
+	return Bucket{name, end}, err
 }
 
 func (b *Bucket) ToUrl() url.URL {
@@ -133,4 +153,10 @@ func NewCanonicalizedResourceFromObjects(bucket *Bucket, continuation_token stri
 		return types.NewCanonicalizedResource(fmt.Sprintf("/%s/?continuation-token=%s", bucket.name, continuation_token))
 	}
 	return types.NewCanonicalizedResource(fmt.Sprintf("/%s/", bucket.name))
+}
+
+type InvalidBucketName struct{}
+
+func (b InvalidBucketName) Error() string {
+	return "invalid bucket name"
 }

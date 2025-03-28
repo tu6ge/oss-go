@@ -5,8 +5,11 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"net/url"
+	"os"
 	"strings"
 	"unicode"
+
+	"github.com/joho/godotenv"
 )
 
 type Secret struct {
@@ -113,6 +116,16 @@ const (
 	ENDPOINT_US_WEST_1   string = "us-west-1"
 	ENDPOINT_US_EAST_1   string = "us-east-1"
 )
+
+func EndPointFromEnv() (EndPoint, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return EndPoint{}, err
+	}
+	str := os.Getenv("ALIYUN_ENDPOINT")
+
+	return NewEndPoint(str)
+}
 
 func NewEndPoint(value string) (EndPoint, error) {
 	if len(value) == 0 {

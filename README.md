@@ -6,7 +6,7 @@
 ```
 ALIYUN_KEY_ID=xxx
 ALIYUN_KEY_SECRET=xxx
-ALIYUN_ENDPOINT=https://oss-cn-shanghai.aliyuncs.com
+ALIYUN_ENDPOINT=cn-shanghai
 ALIYUN_BUCKET=xxx
 ```
 
