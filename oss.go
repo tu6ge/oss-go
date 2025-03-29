@@ -126,7 +126,17 @@ func (c Client) GetBuckets(endpoint types.EndPoint) ([]Bucket, error) {
 		return []Bucket{}, err
 	}
 
-	return parser_xml(string(body), endpoint), nil
+	body_string := string(body)
+
+	if http_status_ok(resp.StatusCode) {
+		return parser_xml(body_string, endpoint), nil
+	} else {
+		return nil, parse_oss_response_error(body_string)
+	}
+}
+
+func http_status_ok(status int) bool {
+	return status >= http.StatusOK && status < http.StatusMultipleChoices
 }
 
 func parser_xml(xml string, endpoint types.EndPoint) []Bucket {

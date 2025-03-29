@@ -82,11 +82,20 @@ func (b *Bucket) GetObjects(query types.ObjectQuery, client *Client) (Objects, e
 	}
 
 	// fmt.Println(string(body))
-	xml := string(body)
-	token := parse_item(xml, "NextContinuationToken")
-	object_rs := parser_xml_objects(xml)
 
-	return Objects{object_rs, token}, nil
+	body_string := string(body)
+
+	// fmt.Println("status", resp.StatusCode)
+
+	if http_status_ok(resp.StatusCode) {
+		token := parse_item(body_string, "NextContinuationToken")
+		object_rs := parser_xml_objects(body_string)
+
+		return Objects{object_rs, token}, nil
+	} else {
+		// fmt.Println(body_string)
+		return Objects{}, parse_oss_response_error(body_string)
+	}
 }
 
 func parser_xml_objects(xml string) []Object {
@@ -143,7 +152,7 @@ func parse_item(xml, field string) string {
 	end_index := strings.Index(xml, end_tag)
 
 	if start_index > -1 && end_index > -1 {
-		return xml[start_index+2 : end_index]
+		return xml[start_index+len(start_tag) : end_index]
 	}
 	return ""
 }

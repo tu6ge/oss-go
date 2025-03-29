@@ -60,7 +60,18 @@ func (obj Object) Upload(content []byte, content_type string, client *Client) er
 	}
 
 	defer resp.Body.Close()
-	return err
+
+	if http_status_ok(resp.StatusCode) {
+		return nil
+	} else {
+		// 读取响应体
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body_string := string(body)
+		return parse_oss_response_error(body_string)
+	}
 }
 
 func (obj Object) Download(client *Client) ([]byte, error) {
@@ -93,7 +104,12 @@ func (obj Object) Download(client *Client) ([]byte, error) {
 		return nil, err
 	}
 
-	return data, nil
+	if http_status_ok(resp.StatusCode) {
+		return data, nil
+	} else {
+		body_string := string(data)
+		return nil, parse_oss_response_error(body_string)
+	}
 }
 
 func (obj Object) CopyFrom(source string, content_type string, client *Client) error {
@@ -125,12 +141,17 @@ func (obj Object) CopyFrom(source string, content_type string, client *Client) e
 
 	defer resp.Body.Close()
 
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(string(body))
-	return err
+	if http_status_ok(resp.StatusCode) {
+		return nil
+	} else {
+		// 读取响应体
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body_string := string(body)
+		return parse_oss_response_error(body_string)
+	}
 }
 
 func (obj Object) Delete(client *Client) error {
@@ -157,12 +178,17 @@ func (obj Object) Delete(client *Client) error {
 
 	defer resp.Body.Close()
 
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(string(body))
-	return err
+	if http_status_ok(resp.StatusCode) {
+		return nil
+	} else {
+		// 读取响应体
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body_string := string(body)
+		return parse_oss_response_error(body_string)
+	}
 }
 
 func CanonicalizedResourceFromObject(bucket *Bucket, object *Object) types.CanonicalizedResource {
