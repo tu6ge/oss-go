@@ -50,7 +50,7 @@ func (b *Bucket) ToUrl() url.URL {
 	return *u
 }
 
-func (b *Bucket) GetObjects(query types.ObjectQuery, client Client) (Objects, error) {
+func (b *Bucket) GetObjects(query types.ObjectQuery, client *Client) (Objects, error) {
 	url := b.ToUrl()
 	url.RawQuery = query.ToOssQuery()
 	method := "GET"

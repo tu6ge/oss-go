@@ -70,10 +70,14 @@ func (c Client) AuthorizationHeader(method string, resource types.CanonicalizedR
 
 	oss_header_str := to_oss_header(headers)
 
+	content_type, ok_content_type := headers["Content-Type"]
+
 	sign_str := method
 	sign_str += LINE_BREAK
 	sign_str += LINE_BREAK
-	sign_str += CONTENT_TYPE
+	if ok_content_type {
+		sign_str += content_type
+	}
 	sign_str += LINE_BREAK
 	sign_str += date
 	sign_str += LINE_BREAK
@@ -88,7 +92,6 @@ func (c Client) AuthorizationHeader(method string, resource types.CanonicalizedR
 	headers["VERB"] = method
 	headers["Date"] = date
 	headers["Authorization"] = sign
-	headers["Content-Type"] = CONTENT_TYPE
 	headers["CanonicalizedResource"] = resource_str
 	return headers
 }
@@ -201,7 +204,7 @@ type ossMap struct {
 func to_oss_header(headers map[string]string) string {
 	var oss_map []ossMap
 	for k, v := range headers {
-		if strings.HasPrefix(k, "oss-") {
+		if strings.HasPrefix(k, "x-oss-") {
 			oss_map = append(oss_map, ossMap{k, v})
 		}
 	}
