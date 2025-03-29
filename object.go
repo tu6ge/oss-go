@@ -21,7 +21,7 @@ func (objs Objects) NextList(query types.ObjectQuery, client *Client) (Objects, 
 		return Objects{}, errors.New("no found next_token")
 	}
 	query.Insert(types.QUERY_CONTINUATION_TOKEN, objs.NextToken)
-	return client.bucket.GetObjects(query, client)
+	return client.Bucket.GetObjects(query, client)
 }
 
 type Object struct {
@@ -39,7 +39,7 @@ func (obj Object) ToUrl(bucket *Bucket) url.URL {
 }
 
 func (obj Object) Upload(content []byte, content_type string, client *Client) error {
-	bucket := client.bucket
+	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "PUT"
 
@@ -84,7 +84,7 @@ func (obj Object) Upload(content []byte, content_type string, client *Client) er
 }
 
 func (obj Object) Download(client *Client) ([]byte, error) {
-	bucket := client.bucket
+	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "GET"
 
@@ -122,7 +122,7 @@ func (obj Object) Download(client *Client) ([]byte, error) {
 }
 
 func (obj Object) CopyFrom(source string, content_type string, client *Client) error {
-	bucket := client.bucket
+	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "PUT"
 
@@ -164,7 +164,7 @@ func (obj Object) CopyFrom(source string, content_type string, client *Client) e
 }
 
 func (obj Object) Delete(client *Client) error {
-	bucket := client.bucket
+	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "DELETE"
 

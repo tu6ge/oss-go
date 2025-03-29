@@ -17,7 +17,7 @@ import (
 type Client struct {
 	access_key_id    string
 	access_secret_id types.Secret
-	bucket           Bucket
+	Bucket           Bucket
 }
 
 func New(key, secret, bucket, endpoint string) (Client, error) {
