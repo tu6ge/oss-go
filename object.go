@@ -2,6 +2,7 @@ package oss
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,14 @@ import (
 type Objects struct {
 	List      []Object
 	NextToken string
+}
+
+func (objs Objects) NextList(query types.ObjectQuery, client *Client) (Objects, error) {
+	if len(objs.NextToken) == 0 {
+		return Objects{}, errors.New("no found next_token")
+	}
+	query.Insert(types.QUERY_CONTINUATION_TOKEN, objs.NextToken)
+	return client.bucket.GetObjects(query, client)
 }
 
 type Object struct {

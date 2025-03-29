@@ -36,8 +36,14 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
 	fmt.Println(objects)
+
+	second_objects, err := objects.NextList(query, &client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(second_objects)
 
 	obj := oss.NewObject("aaabbc4.html")
 
