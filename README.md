@@ -110,6 +110,6 @@ func main() {
 跟 aliyun 官方提供的 sdk 进行 bench 比较，发现性能提高了不少，以下是上传文件进行 bench 的测试
 
 ```
-BenchmarkUpload-4          30236             39481 ns/op
-BenchmarkOssUpload-4          10         100343922 ns/op
+本 library           30236             39481 ns/op
+aliyun官方的sdk          10         100343922 ns/op
 ```
