@@ -140,7 +140,7 @@ func parser_xml_objects(xml string) []Object {
 	for i, item := range start_positions {
 		name := xml[item+len("<Key>") : end_positions[i]]
 
-		buckets = append(buckets, Object{name})
+		buckets = append(buckets, NewObject(name))
 	}
 	return buckets
 }

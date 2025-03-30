@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/tu6ge/oss-go"
 	"github.com/tu6ge/oss-go/types"
@@ -45,16 +46,42 @@ func main() {
 	query := types.NewObjectQuery()
 	query.Insert(types.QUERY_MAX_KEYS, "5")
 
-	objects, _ := buckets[1].GetObjects(query, &client)
-
+	objects, err := buckets[1].GetObjects(query, &client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	fmt.Println(objects)
+
+	second_objects, err := objects.NextList(query, &client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(second_objects)
 
 	obj := oss.NewObject("aaabbc4.html")
 
 	content := []byte("foo")
 
-	err = obj.Upload(content, "text/plain;charset=utf-8", &client)
-	fmt.Println(err)
+	err = obj.Content(content).ContentType("text/plain;charset=utf-8").Upload(&client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	f, err := os.Open("./demofile.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+
+	err = oss.NewObject("from_file.txt").File(f).ContentType("text/plain;charset=utf-8").Upload(&client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	con, err := obj.Download(&client)
 	if err != nil {
@@ -64,11 +91,16 @@ func main() {
 	fmt.Println("content:", string(con))
 
 	obj_copy := oss.NewObject("xyz.html")
-	res := obj_copy.CopyFrom("/honglei123/aaabbc.html", "text/plain;charset=utf-8", &client)
-	fmt.Println(res)
+	err = obj_copy.CopySource("/honglei123/aaabbc.html").ContentType("text/plain;charset=utf-8").Copy(&client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	err = obj.Delete(&client)
-
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 ```

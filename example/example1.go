@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/tu6ge/oss-go"
 	"github.com/tu6ge/oss-go/types"
@@ -49,7 +50,20 @@ func main() {
 
 	content := []byte("foo")
 
-	err = obj.Upload(content, "text/plain;charset=utf-8", &client)
+	err = obj.Content(content).ContentType("text/plain;charset=utf-8").Upload(&client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	f, err := os.Open("./demofile.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer f.Close()
+
+	err = oss.NewObject("from_file.txt").File(f).ContentType("text/plain;charset=utf-8").Upload(&client)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -63,7 +77,7 @@ func main() {
 	fmt.Println("content:", string(con))
 
 	obj_copy := oss.NewObject("xyz.html")
-	err = obj_copy.CopyFrom("/honglei123/aaabbc.html", "text/plain;charset=utf-8", &client)
+	err = obj_copy.CopySource("/honglei123/aaabbc.html").ContentType("text/plain;charset=utf-8").Copy(&client)
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -25,11 +25,14 @@ func (objs Objects) NextList(query types.ObjectQuery, client *Client) (Objects, 
 }
 
 type Object struct {
-	path string
+	path         string
+	content      []byte
+	content_type string
+	copy_source  string
 }
 
 func NewObject(path string) Object {
-	return Object{path}
+	return Object{path, nil, "", ""}
 }
 
 func (obj Object) ToUrl(bucket *Bucket) url.URL {
@@ -38,23 +41,42 @@ func (obj Object) ToUrl(bucket *Bucket) url.URL {
 	return url
 }
 
-func (obj Object) Upload(content []byte, content_type string, client *Client) error {
+func (obj Object) Content(con []byte) Object {
+	obj.content = con
+	return obj
+}
+
+func (obj Object) File(reader io.Reader) Object {
+	con, err := io.ReadAll(reader)
+	if err != nil {
+		panic(err)
+	}
+	obj.content = con
+	return obj
+}
+
+func (obj Object) ContentType(con string) Object {
+	obj.content_type = con
+	return obj
+}
+
+func (obj Object) Upload(client *Client) error {
 	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "PUT"
 
 	resource := CanonicalizedResourceFromObject(&bucket, &obj)
 	headers := make(map[string]string)
-	if len(content_type) > 0 {
-		headers["Content-Type"] = content_type
+	if len(obj.content_type) > 0 {
+		headers["Content-Type"] = obj.content_type
 	}
 	headers = client.AuthorizationHeader(method, resource, headers)
 
-	if len(content) == 0 {
+	if len(obj.content) == 0 {
 		headers["Content-Length"] = "0"
 	}
 
-	req, err := http.NewRequest(method, url.String(), bytes.NewReader(content))
+	req, err := http.NewRequest(method, url.String(), bytes.NewReader(obj.content))
 	if err != nil {
 		return err
 	}
@@ -121,16 +143,24 @@ func (obj Object) Download(client *Client) ([]byte, error) {
 	}
 }
 
-func (obj Object) CopyFrom(source string, content_type string, client *Client) error {
+func (obj Object) CopySource(source string) Object {
+	obj.copy_source = source
+	return obj
+}
+
+func (obj Object) Copy(client *Client) error {
 	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "PUT"
 
 	resource := CanonicalizedResourceFromObject(&bucket, &obj)
 	headers := make(map[string]string)
-	headers["x-oss-copy-source"] = source
-	if len(content_type) > 0 {
-		headers["Content-Type"] = content_type
+	if len(obj.copy_source) == 0 {
+		return errors.New("not found copy source")
+	}
+	headers["x-oss-copy-source"] = obj.copy_source
+	if len(obj.content_type) > 0 {
+		headers["Content-Type"] = obj.content_type
 	}
 	headers = client.AuthorizationHeader(method, resource, headers)
 
