@@ -107,9 +107,22 @@ func main() {
 
 # Bench
 
-跟 aliyun 官方提供的 sdk 进行 bench 比较，发现性能提高了不少，以下是上传文件进行 bench 的测试
+跟 aliyun 官方提供的 sdk 进行 bench 比较，发现性能提高了一倍，以下是上传文件进行 bench 的测试
 
 ```
-本 library           30236             39481 ns/op
-aliyun官方的sdk          10         100343922 ns/op
+goos: darwin
+goarch: arm64
+pkg: bench
+cpu: Apple M1
+BenchmarkSelfUpload-8                 19          55770158 ns/op
+BenchmarkAliyunUpload-8               10         102589812 ns/op
+```
+
+## 运行 bench 的方法
+
+```
+git clone git@github.com:tu6ge/oss-go.git
+cd bench
+# 重命名 .env.example 为 .env 并加上 aliyun oss 的配置
+go test --bench=.
 ```
