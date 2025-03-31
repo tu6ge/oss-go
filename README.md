@@ -27,6 +27,8 @@ import (
 func main() {
 	// Get a greeting message and print it.
 	client, err := oss.NewWithEnv()
+	// 或者
+	// client,err := oss.New("key","secret","bucket_name","cn-hangzhou")
 	if err != nil {
 		fmt.Println(err)
 		return
