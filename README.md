@@ -122,7 +122,7 @@ BenchmarkAliyunUpload-8               10         102589812 ns/op
 
 ```
 git clone git@github.com:tu6ge/oss-go.git
-cd bench
+cd oss-go/bench
 # 重命名 .env.example 为 .env 并加上 aliyun oss 的配置
 go test --bench=.
 ```
