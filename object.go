@@ -33,6 +33,10 @@ type Object struct {
 	errors       error
 }
 
+func (obj Object) String() string {
+	return obj.path
+}
+
 func NewObject(path string) Object {
 	return Object{path, nil, "", "", nil}
 }
