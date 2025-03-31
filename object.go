@@ -29,10 +29,11 @@ type Object struct {
 	content      []byte
 	content_type string
 	copy_source  string
+	errors       error
 }
 
 func NewObject(path string) Object {
-	return Object{path, nil, "", ""}
+	return Object{path, nil, "", "", nil}
 }
 
 func (obj Object) ToUrl(bucket *Bucket) url.URL {
@@ -49,7 +50,8 @@ func (obj Object) Content(con []byte) Object {
 func (obj Object) File(reader io.Reader) Object {
 	con, err := io.ReadAll(reader)
 	if err != nil {
-		panic(err)
+		obj.errors = err
+		return obj
 	}
 	obj.content = con
 	return obj
@@ -61,6 +63,10 @@ func (obj Object) ContentType(con string) Object {
 }
 
 func (obj Object) Upload(client *Client) error {
+	if obj.errors != nil {
+		return obj.errors
+	}
+
 	bucket := client.Bucket
 	url := obj.ToUrl(&bucket)
 	method := "PUT"
