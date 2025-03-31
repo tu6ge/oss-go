@@ -7,6 +7,8 @@
 ALIYUN_KEY_ID=xxx
 ALIYUN_KEY_SECRET=xxx
 ALIYUN_ENDPOINT=cn-shanghai
+# 支持内网使用
+# ALIYUN_ENDPOINT=cn-shanghai-internal
 ALIYUN_BUCKET=xxx
 ```
 
