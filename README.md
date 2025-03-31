@@ -85,6 +85,12 @@ func main() {
 		return
 	}
 
+	err = oss.NewObject("from_file2.txt").FilePath("./demofile.txt").ContentType("text/plain;charset=utf-8").Upload(&client)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	con, err := obj.Download(&client)
 	if err != nil {
 		fmt.Println(err)

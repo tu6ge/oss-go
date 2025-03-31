@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/tu6ge/oss-go/types"
 )
@@ -55,6 +56,17 @@ func (obj Object) File(reader io.Reader) Object {
 	}
 	obj.content = con
 	return obj
+}
+
+func (obj Object) FilePath(name string) Object {
+	f, err := os.Open(name)
+	if err != nil {
+		obj.errors = err
+		return obj
+	}
+	defer f.Close()
+
+	return obj.File(f)
 }
 
 func (obj Object) ContentType(con string) Object {
