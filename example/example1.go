@@ -41,8 +41,9 @@ func main() {
 	}
 
 	// 查询文件列表
-	query := make(map[string]string)
-	query[oss.QUERY_MAX_KEYS] = "5"
+	query := map[string]string{
+		oss.QUERY_MAX_KEYS: "5",
+	}
 
 	objects, err := buckets[1].Query(query).GetObjects(&client)
 	if err != nil {

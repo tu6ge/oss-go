@@ -57,10 +57,11 @@ func main() {
 	}
 
 	// 查询文件列表
-	query := types.NewObjectQuery()
-	query.Insert(types.QUERY_MAX_KEYS, "5")
+	query := map[string]string{
+		oss.QUERY_MAX_KEYS: "5",
+	}
 
-	objects, err := buckets[1].GetObjects(query, &client)
+	objects, err := buckets[1].Query(query).GetObjects(&client)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -68,7 +69,7 @@ func main() {
 	fmt.Println(objects)
 
 	// 查询第二页的文件列表
-	second_objects, err := objects.NextList(query, &client)
+	second_objects, err := objects.NextList(&client)
 	if err != nil {
 		fmt.Println(err)
 		return
