@@ -15,6 +15,7 @@ import (
 type Bucket struct {
 	name     string
 	endpoint types.EndPoint
+	query    types.ObjectQuery
 }
 
 func NewBucket(name, endpoint string) (Bucket, error) {
@@ -27,7 +28,7 @@ func NewBucket(name, endpoint string) (Bucket, error) {
 		return Bucket{}, &InvalidBucketName{}
 	}
 
-	return Bucket{name, end}, nil
+	return Bucket{name, end, types.NewObjectQuery()}, nil
 }
 
 func BucketFromEnv() (Bucket, error) {
@@ -41,7 +42,7 @@ func BucketFromEnv() (Bucket, error) {
 		return Bucket{}, err
 	}
 
-	return Bucket{name, end}, err
+	return Bucket{name, end, types.NewObjectQuery()}, err
 }
 
 func (b *Bucket) ToUrl() url.URL {
@@ -50,11 +51,23 @@ func (b *Bucket) ToUrl() url.URL {
 	return *u
 }
 
-func (b *Bucket) GetObjects(query types.ObjectQuery, client *Client) (Objects, error) {
+func (b Bucket) Query(query map[string]string) Bucket {
+	for key, val := range query {
+		b.query.Insert(key, val)
+	}
+	return b
+}
+
+func (b Bucket) ObjectQuery(query types.ObjectQuery) Bucket {
+	b.query = query
+	return b
+}
+
+func (b Bucket) GetObjects(client *Client) (Objects, error) {
 	url := b.ToUrl()
-	url.RawQuery = query.ToOssQuery()
+	url.RawQuery = b.query.ToOssQuery()
 	method := "GET"
-	resource := NewCanonicalizedResourceFromObjects(b, query.GetNextToken())
+	resource := NewCanonicalizedResourceFromObjects(&b, b.query.GetNextToken())
 
 	headers := client.Authorization(method, resource)
 
@@ -91,7 +104,7 @@ func (b *Bucket) GetObjects(query types.ObjectQuery, client *Client) (Objects, e
 		token := parse_item(body_string, "NextContinuationToken")
 		object_rs := parser_xml_objects(body_string)
 
-		return Objects{object_rs, token}, nil
+		return Objects{object_rs, token, b.query}, nil
 	} else {
 		// fmt.Println(body_string)
 		return Objects{}, parse_oss_response_error(body_string)

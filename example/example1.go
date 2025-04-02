@@ -41,23 +41,23 @@ func main() {
 	}
 
 	// 查询文件列表
-	query := types.NewObjectQuery()
-	query.Insert(types.QUERY_MAX_KEYS, "5")
+	query := make(map[string]string)
+	query[oss.QUERY_MAX_KEYS] = "5"
 
-	objects, err := buckets[1].GetObjects(query, &client)
+	objects, err := buckets[1].Query(query).GetObjects(&client)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(objects)
+	fmt.Println("objects :", objects)
 
 	// 查询第二页的文件列表
-	second_objects, err := objects.NextList(query, &client)
+	second_objects, err := objects.NextList(&client)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(second_objects)
+	fmt.Println("second objects :", second_objects)
 
 	// 初始化文件结构体
 	obj := oss.NewObject("aaabbc4.html")

@@ -16,6 +16,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var (
+	QUERY_START_AFTER        = types.QUERY_START_AFTER
+	QUERY_CONTINUATION_TOKEN = types.QUERY_CONTINUATION_TOKEN
+	QUERY_MAX_KEYS           = types.QUERY_MAX_KEYS
+	QUERY_PREFIX             = types.QUERY_PREFIX
+	QUERY_ENCODING_TYPE      = types.QUERY_ENCODING_TYPE
+	QUERY_FETCH_OWNER        = types.QUERY_FETCH_OWNER
+)
+
 type Client struct {
 	access_key_id    string
 	access_secret_id types.Secret
@@ -193,7 +202,7 @@ func parser_xml(xml string, endpoint types.EndPoint) []Bucket {
 	for i, item := range start_positions {
 		name := xml[item+len("<Name>") : end_positions[i]]
 
-		buckets = append(buckets, Bucket{name, endpoint})
+		buckets = append(buckets, Bucket{name, endpoint, types.NewObjectQuery()})
 	}
 	return buckets
 }

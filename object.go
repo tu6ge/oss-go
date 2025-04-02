@@ -15,14 +15,15 @@ import (
 type Objects struct {
 	List      []Object
 	NextToken string
+	query     types.ObjectQuery
 }
 
-func (objs Objects) NextList(query types.ObjectQuery, client *Client) (Objects, error) {
+func (objs Objects) NextList(client *Client) (Objects, error) {
 	if len(objs.NextToken) == 0 {
 		return Objects{}, errors.New("no found next_token")
 	}
-	query.Insert(types.QUERY_CONTINUATION_TOKEN, objs.NextToken)
-	return client.Bucket.GetObjects(query, client)
+	objs.query.Insert(types.QUERY_CONTINUATION_TOKEN, objs.NextToken)
+	return client.Bucket.ObjectQuery(objs.query).GetObjects(client)
 }
 
 type Object struct {
