@@ -1,9 +1,11 @@
 package oss
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -96,8 +98,18 @@ func (c Client) AuthorizationHeader(method string, resource types.CanonicalizedR
 	return headers
 }
 
-func (c Client) GetBuckets(endpoint types.EndPoint) ([]Bucket, error) {
-	url := endpoint.ToUrl()
+func (c Client) GetBuckets(endpoint ...types.EndPoint) ([]Bucket, error) {
+	var url url.URL
+	var end types.EndPoint
+	if len(endpoint) == 0 {
+		end = c.Bucket.endpoint
+		url = end.ToUrl()
+	} else if len(endpoint) == 1 {
+		end = endpoint[0]
+		url = end.ToUrl()
+	} else {
+		return []Bucket{}, errors.New("too many args")
+	}
 	method := "GET"
 	resource := types.DefaultCanonicalizedResource()
 
@@ -129,7 +141,7 @@ func (c Client) GetBuckets(endpoint types.EndPoint) ([]Bucket, error) {
 	body_string := string(body)
 
 	if http_status_ok(resp.StatusCode) {
-		return parser_xml(body_string, endpoint), nil
+		return parser_xml(body_string, end), nil
 	} else {
 		return nil, parse_oss_response_error(body_string)
 	}

@@ -34,6 +34,14 @@ func main() {
 		return
 	}
 
+	// 根据默认配置的 endpoint 获取 bucket 列表
+	buckets_from_cofig, err := client.GetBuckets()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(buckets_from_cofig)
+
 	end, err := types.NewEndPoint("cn-shanghai")
 	if err != nil {
 		fmt.Println(err)
