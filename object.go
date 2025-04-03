@@ -20,10 +20,16 @@ type Objects struct {
 
 func (objs Objects) NextList(client *Client) (Objects, error) {
 	if len(objs.NextToken) == 0 {
-		return Objects{}, errors.New("no found next_token")
+		return Objects{}, &NoFoundMoreObject{}
 	}
 	objs.query.Insert(types.QUERY_CONTINUATION_TOKEN, objs.NextToken)
 	return client.Bucket.ObjectQuery(objs.query).GetObjects(client)
+}
+
+type NoFoundMoreObject struct{}
+
+func (n *NoFoundMoreObject) Error() string {
+	return "no found more object"
 }
 
 type Object struct {
