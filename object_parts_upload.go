@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -16,6 +17,8 @@ import (
 type PartsUpload struct {
 	path      string
 	upload_id string
+	file_path string
+	part_size int
 	etag_list []etag_struct
 }
 
@@ -25,7 +28,7 @@ type etag_struct struct {
 }
 
 func NewPartsUpload(path string) PartsUpload {
-	return PartsUpload{path, "", []etag_struct{}}
+	return PartsUpload{path, "", "", 1024 * 1024, []etag_struct{}}
 }
 
 func (m PartsUpload) ToUrl(bucket *Bucket) url.URL {
@@ -34,12 +37,67 @@ func (m PartsUpload) ToUrl(bucket *Bucket) url.URL {
 	return url
 }
 
-func (m PartsUpload) InitMulit(client *Client) error {
+func (m PartsUpload) FilePath(filepath string) PartsUpload {
+	m.file_path = filepath
+	return m
+}
+
+func (m PartsUpload) PartSize(part_size int) PartsUpload {
+	m.part_size = part_size
+	return m
+}
+
+func (m PartsUpload) Upload(client *Client) error {
+	if len(m.file_path) == 0 {
+		return errors.New("not setting filepath")
+	}
+	if m.part_size < 1024*100 {
+		return errors.New("part size not less than 100k")
+	}
+
+	err := m.InitMulit(client)
+	if err != nil {
+		return err
+	}
+	// 打开大文件
+	file, err := os.Open(m.file_path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	buffer := make([]byte, m.part_size)
+
+	chunkIndex := 1
+	for {
+		// 读  m.part_size 大小的数据
+		n, err := file.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				break // 读到文件尾，退出
+			}
+			return err
+		}
+
+		// 处理每一片数据
+		err = m.UploadPart(chunkIndex, buffer[:n], client)
+		if err != nil {
+			return err
+		}
+
+		chunkIndex++
+	}
+
+	return m.Complete(client)
+}
+
+func (m *PartsUpload) InitMulit(client *Client) error {
 	bucket := client.Bucket
 	url := m.ToUrl(&bucket)
+	url.RawQuery = "uploads"
 	method := "POST"
 
-	resource := canonicalized_resource(&bucket, &m)
+	resource := canonicalized_resource(&bucket, m)
 	headers := client.Authorization(method, resource)
 
 	req, err := http.NewRequest(method, url.String(), nil)
@@ -63,6 +121,7 @@ func (m PartsUpload) InitMulit(client *Client) error {
 		return err
 	}
 	body_string := string(body)
+	// fmt.Println("body_string", body_string)
 	m.upload_id = parse_upload_id(body_string)
 	if len(m.upload_id) == 0 {
 		return errors.New("not found upload_id")
@@ -71,19 +130,20 @@ func (m PartsUpload) InitMulit(client *Client) error {
 	return nil
 }
 
-func (m PartsUpload) UploadPart(index int, con []byte, client *Client) error {
+func (m *PartsUpload) UploadPart(index int, con []byte, client *Client) error {
 	bucket := client.Bucket
 	url := m.ToUrl(&bucket)
+	url.RawQuery = fmt.Sprintf("partNumber=%d&uploadId=%s", index, m.upload_id)
 	method := "PUT"
 
-	resource := canonicalized_resource_part(&bucket, &m, index, m.upload_id)
+	resource := canonicalized_resource_part(&bucket, m, index, m.upload_id)
 
 	headers := map[string]string{
 		"Content-Length": strconv.Itoa(len(con)),
 	}
 	headers = client.AuthorizationHeader(method, resource, headers)
 
-	req, err := http.NewRequest(method, url.String(), nil)
+	req, err := http.NewRequest(method, url.String(), bytes.NewReader([]byte(con)))
 	if err != nil {
 		return err
 	}
@@ -106,7 +166,7 @@ func (m PartsUpload) UploadPart(index int, con []byte, client *Client) error {
 	return nil
 }
 
-func (m PartsUpload) etag_list_xml() string {
+func (m *PartsUpload) etag_list_xml() string {
 	list := ""
 	for _, item := range m.etag_list {
 		list += fmt.Sprintf("<Part><PartNumber>%d</PartNumber><ETag>%s</ETag></Part>", item.index, item.content)
@@ -115,12 +175,13 @@ func (m PartsUpload) etag_list_xml() string {
 	return fmt.Sprintf("<CompleteMultipartUpload>%s</CompleteMultipartUpload>", list)
 }
 
-func (m PartsUpload) Complete(client *Client) error {
+func (m *PartsUpload) Complete(client *Client) error {
 	bucket := client.Bucket
 	url := m.ToUrl(&bucket)
+	url.RawQuery = fmt.Sprintf("uploadId=%s", m.upload_id)
 	method := "POST"
 
-	resource := canonicalized_resource_complete(&bucket, &m, m.upload_id)
+	resource := canonicalized_resource_complete(&bucket, m, m.upload_id)
 
 	xml := m.etag_list_xml()
 
@@ -149,7 +210,7 @@ func (m PartsUpload) Complete(client *Client) error {
 }
 
 func canonicalized_resource(bucket *Bucket, object *PartsUpload) types.CanonicalizedResource {
-	return types.NewCanonicalizedResource(fmt.Sprintf("/%s/%s?upload", bucket.name, object.path))
+	return types.NewCanonicalizedResource(fmt.Sprintf("/%s/%s?uploads", bucket.name, object.path))
 }
 
 func canonicalized_resource_part(bucket *Bucket, object *PartsUpload, index int, upload_id string) types.CanonicalizedResource {

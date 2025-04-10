@@ -132,6 +132,15 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
+	// 文件的分片上传
+	object := oss.NewPartsUpload("video222.mov")
+
+	err = object.FilePath("./video.mov").Upload(&client)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	fmt.Println("upload success")
 }
 ```
 
