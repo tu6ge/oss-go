@@ -14,10 +14,9 @@ import (
 )
 
 type PartsUpload struct {
-	path         string
-	content_type string
-	upload_id    string
-	etag_list    []etag_struct
+	path      string
+	upload_id string
+	etag_list []etag_struct
 }
 
 type etag_struct struct {
@@ -26,18 +25,13 @@ type etag_struct struct {
 }
 
 func NewPartsUpload(path string) PartsUpload {
-	return PartsUpload{path, "", "", []etag_struct{}}
+	return PartsUpload{path, "", []etag_struct{}}
 }
 
 func (m PartsUpload) ToUrl(bucket *Bucket) url.URL {
 	url := bucket.ToUrl()
 	url.Path = m.path
 	return url
-}
-
-func (m PartsUpload) ContentType(con string) PartsUpload {
-	m.content_type = con
-	return m
 }
 
 func (m PartsUpload) InitMulit(client *Client) error {
