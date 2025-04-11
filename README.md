@@ -1,5 +1,9 @@
 # Go 实现的 aliyun oss sdk
 
+<p align="center">
+<img src="https://github.com/tu6ge/oss-go/blob/main/assets/oss-go.png?raw=true" width="100px" />
+</p>
+
 ## 用法
 
 1. 在项目根目录创建 `.env` 文件，在文件内填写 oss 的配置信息：
