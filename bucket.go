@@ -16,6 +16,7 @@ type Bucket struct {
 	name     string
 	endpoint types.EndPoint
 	query    types.ObjectQuery
+	domain   string
 }
 
 func NewBucket(name, endpoint string) (Bucket, error) {
@@ -28,7 +29,7 @@ func NewBucket(name, endpoint string) (Bucket, error) {
 		return Bucket{}, &InvalidBucketName{}
 	}
 
-	return Bucket{name, end, types.NewObjectQuery()}, nil
+	return Bucket{name, end, types.NewObjectQuery(), ""}, nil
 }
 
 func BucketFromEnv() (Bucket, error) {
@@ -42,11 +43,19 @@ func BucketFromEnv() (Bucket, error) {
 		return Bucket{}, err
 	}
 
-	return Bucket{name, end, types.NewObjectQuery()}, err
+	return Bucket{name, end, types.NewObjectQuery(), ""}, err
+}
+
+func (b *Bucket) SetDomain(domain string) {
+	b.domain = domain
 }
 
 func (b *Bucket) ToUrl() url.URL {
 	u, _ := url.Parse("https://" + b.name + "." + b.endpoint.Host())
+
+	if len(b.domain) > 0 {
+		u, _ = url.Parse(b.domain)
+	}
 
 	return *u
 }

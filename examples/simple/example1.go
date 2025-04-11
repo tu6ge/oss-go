@@ -40,6 +40,8 @@ func main() {
 		return
 	}
 
+	buckets[1].SetDomain("http://oss2.xiaoqiezi.top")
+
 	// 查询文件列表
 	query := map[string]string{
 		oss.QUERY_MAX_KEYS: "5",
@@ -62,6 +64,8 @@ func main() {
 
 	// 初始化文件结构体
 	obj := oss.NewObject("aaabbc4.html")
+
+	client.SetBucketDomain("http://oss2.xiaoqiezi.top")
 
 	// 使用文件内容上传文件
 	content := []byte("foo")

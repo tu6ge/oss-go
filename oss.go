@@ -95,6 +95,8 @@ func (c Client) AuthorizationHeader(method string, resource types.CanonicalizedR
 	sign_str += oss_header_str
 	sign_str += resource_str
 
+	// fmt.Println("sign_str", sign_str)
+
 	encry := c.access_secret_id.Encryption(sign_str)
 
 	sign := fmt.Sprintf("OSS %s:%s", c.access_key_id, encry)
@@ -105,6 +107,10 @@ func (c Client) AuthorizationHeader(method string, resource types.CanonicalizedR
 	headers["Authorization"] = sign
 	headers["CanonicalizedResource"] = resource_str
 	return headers
+}
+
+func (c *Client) SetBucketDomain(domain string) {
+	c.Bucket.SetDomain(domain)
 }
 
 func (c Client) GetBuckets(endpoint ...types.EndPoint) ([]Bucket, error) {
@@ -202,7 +208,7 @@ func parser_xml(xml string, endpoint types.EndPoint) []Bucket {
 	for i, item := range start_positions {
 		name := xml[item+len("<Name>") : end_positions[i]]
 
-		buckets = append(buckets, Bucket{name, endpoint, types.NewObjectQuery()})
+		buckets = append(buckets, Bucket{name, endpoint, types.NewObjectQuery(), ""})
 	}
 	return buckets
 }
