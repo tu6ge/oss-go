@@ -111,7 +111,7 @@ const (
 	ENDPOINT_CHENGDU     string = "cn-chengdu"
 	ENDPOINT_ZHANGJIAKOU string = "cn-zhangjiakou"
 	ENDPOINT_HEFEI       string = "cn-hefei"
-	ENDPOINT_WUHAN       string = "cn-wuhan"
+	ENDPOINT_WUHAN       string = "cn-wuhan-lr"
 	ENDPOINT_NANJING     string = "cn-nanjing"
 	ENDPOINT_US_WEST_1   string = "us-west-1"
 	ENDPOINT_US_EAST_1   string = "us-east-1"
