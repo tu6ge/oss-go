@@ -203,10 +203,20 @@ func (m *PartsUpload) Complete(client *Client) error {
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
+
 	if http_status_ok(resp.StatusCode) {
 		return nil
+	} else {
+		// 读取响应体
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		body_string := string(body)
+		return parse_oss_response_error(body_string)
 	}
-	return errors.New("complete failed")
 }
 
 func canonicalized_resource(bucket *Bucket, object *PartsUpload) types.CanonicalizedResource {
