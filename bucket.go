@@ -46,6 +46,10 @@ func BucketFromEnv() (Bucket, error) {
 	return Bucket{name, end, types.NewObjectQuery(), ""}, err
 }
 
+func (b *Bucket) SetEndPointDomain(domain string) error {
+	return b.endpoint.SetOriginalDomain(domain)
+}
+
 func (b *Bucket) SetDomain(domain string) {
 	b.domain = domain
 }

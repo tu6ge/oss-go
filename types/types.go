@@ -98,6 +98,7 @@ func (q ObjectQuery) Insert_next_token(value string) {
 type EndPoint struct {
 	value       string
 	is_internal bool
+	original    string
 }
 
 const (
@@ -147,7 +148,7 @@ func NewEndPoint(value string) (EndPoint, error) {
 		return EndPoint{}, &InvalidEndPoint{}
 	}
 
-	return EndPoint{value, is_internal}, nil
+	return EndPoint{value, is_internal, ""}, nil
 }
 
 func (e EndPoint) SetInternal(is_internal bool) {
@@ -158,6 +159,15 @@ func (e EndPoint) IsInternal() bool {
 	return e.is_internal
 }
 
+func (e *EndPoint) SetOriginalDomain(domain string) error {
+	u, err := url.Parse(domain)
+	if err != nil {
+		return err
+	}
+	e.original = u.String()
+	return nil
+}
+
 func (e *EndPoint) ToUrl() url.URL {
 	u, _ := url.Parse("https://" + e.Host())
 
@@ -165,6 +175,11 @@ func (e *EndPoint) ToUrl() url.URL {
 }
 
 func (e *EndPoint) Host() string {
+	if len(e.original) > 0 {
+		u, _ := url.Parse(e.original)
+		return u.Host
+	}
+
 	host := "oss-"
 	host += e.value
 	if e.is_internal {
@@ -185,7 +200,7 @@ func isValidString(s string) bool {
 }
 
 func DefaultEndPoint() EndPoint {
-	return EndPoint{ENDPOINT_QINGDAO, false}
+	return EndPoint{ENDPOINT_QINGDAO, false, ""}
 }
 
 type InvalidEndPoint struct{}

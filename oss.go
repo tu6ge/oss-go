@@ -109,6 +109,10 @@ func (c Client) AuthorizationHeader(method string, resource types.CanonicalizedR
 	return headers
 }
 
+// func (c *Client) SetEndPointDomain(domain string) error {
+// 	return c.Bucket.endpoint.SetOriginalDomain(domain)
+// }
+
 func (c *Client) SetBucketDomain(domain string) {
 	c.Bucket.SetDomain(domain)
 }
