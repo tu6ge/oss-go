@@ -18,7 +18,7 @@ func main() {
 		return
 	}
 
-	// client.SetEndPointDomain("https://oss-accelerate.aliyuncs.com")
+	client.Bucket.SetEndPointDomain("https://oss-cn-shanghai.aliyuncs.com")
 
 	// 根据默认配置的 endpoint 获取 bucket 列表
 	buckets_from_cofig, err := client.GetBuckets()
@@ -42,7 +42,7 @@ func main() {
 		return
 	}
 
-	buckets[1].SetEndPointDomain("https://oss-accelerate.aliyuncs.com")
+	buckets[1].SetEndPointDomain("https://oss-cn-shanghai.aliyuncs.com")
 
 	// 查询文件列表
 	query := map[string]string{
