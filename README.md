@@ -145,6 +145,15 @@ func main() {
 		fmt.Println("error:", err)
 	}
 	fmt.Println("upload success")
+
+	// 大文件的分片下载
+	object := oss.NewPartsDownload("video222.mov")
+
+	err = object.FilePath("./video.mov").Download(&client)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	fmt.Println("download success")
 }
 ```
 
